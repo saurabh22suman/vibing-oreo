@@ -1,0 +1,4 @@
+Notes:
+- This is a scaffold only. It needs to be merged into a Laravel app with composer and migrations run.
+- For admin auth, install Laravel Breeze or Jetstream.
+- Images are stored in public path by default; consider S3 for production.

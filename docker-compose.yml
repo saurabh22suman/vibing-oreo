@@ -1,0 +1,53 @@
+version: '3.8'
+
+services:
+  app:
+    image: php:8.2-cli
+    container_name: vibing_oreo_app
+    working_dir: /app
+    volumes:
+      - ./:/app:cached
+    ports:
+      - "8000:8000"
+    environment:
+      - COMPOSER_ALLOW_SUPERUSER=1
+      - DB_CONNECTION=mysql
+      - DB_HOST=db
+      - DB_PORT=3306
+      - DB_DATABASE=${DB_DATABASE:-vibing_oreo}
+      - DB_USERNAME=${DB_USERNAME:-vibing}
+      - DB_PASSWORD=${DB_PASSWORD:-secret}
+    tty: true
+    depends_on:
+      - db
+    command: >-
+      bash -lc "composer install --no-interaction || true; \
+      php artisan migrate --force || true; \
+      php artisan db:seed --class=DatabaseSeeder --no-interaction || true; \
+      php artisan serve --host=0.0.0.0 --port=8000"
+
+  db:
+    image: mysql:8.0
+    container_name: vibing_oreo_db
+    environment:
+      MYSQL_DATABASE: ${DB_DATABASE:-vibing_oreo}
+      MYSQL_USER: ${DB_USERNAME:-vibing}
+      MYSQL_PASSWORD: ${DB_PASSWORD:-secret}
+      MYSQL_ROOT_PASSWORD: ${DB_ROOT_PASSWORD:-rootpassword}
+    ports:
+      - "3306:3306"
+    volumes:
+      - db_data:/var/lib/mysql
+    healthcheck:
+      test: ["CMD", "mysqladmin", "ping", "-h", "localhost"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  db_data:
+
+# Notes:
+# - This compose file uses SQLite by default (no DB service required).
+# - For production or a multi-container dev environment, add a database service (mysql/postgres)
+#   and update Laravel's .env accordingly.

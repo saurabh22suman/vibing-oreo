@@ -1,0 +1,22 @@
+# Example dokploy configuration for deploying to Dokku/Dokploy
+# Adjust the app name and remote as needed.
+app: vibing-oreo
+branch: main
+build:
+  # use the Dockerfile in the repository root of laravel_app
+  method: dockerfile
+  dockerfile_path: ./Dockerfile
+release:
+  commands:
+    - php artisan migrate --force
+    - php artisan db:seed --class=DatabaseSeeder --no-interaction
+env:
+  APP_ENV: production
+  APP_DEBUG: 'false'
+  APP_URL: https://your-domain.example
+  DB_CONNECTION: mysql
+  DB_HOST: <db-host>
+  DB_PORT: '3306'
+  DB_DATABASE: vibing_oreo
+  DB_USERNAME: vibing
+  DB_PASSWORD: secret

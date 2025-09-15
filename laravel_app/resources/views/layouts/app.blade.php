@@ -257,9 +257,13 @@
         // ensure year element updated (fallback)
         (function(){ var y = document.getElementById('year'); if (y) y.textContent = new Date().getFullYear(); })();
     </script>
+    <!-- Markdown parser + sanitizer for safe client-side rendering of descriptions -->
+    <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/dompurify@3.1.7/dist/purify.min.js"></script>
     <script>
-        // Ensure the login form exists and the Sign in button will submit it.
+        // Ensure the login form exists and the Sign in button will submit it — only on /login.
         (function(){
+            if (!window.location || window.location.pathname !== '/login') return;
             function ensureLoginForm(){
                 try{
                     var main = document.querySelector('main');
@@ -423,12 +427,22 @@
                 setTimeout(function(){ try{ el.remove(); } catch(e){} }, 2000);
             }
 
-            // Handle clicks and touch starts; passive so it doesn't block scroll
-            window.addEventListener('click', function(e){ createRipple(e.clientX, e.clientY); }, {passive:true});
+            // Handle clicks and touch starts; skip inside modals to avoid interfering with inputs (e.g., file picker)
+            window.addEventListener('click', function(e){
+                try{ if (e && e.target && (e.target.closest && e.target.closest('.modal'))) return; }catch(_){}
+                createRipple(e.clientX, e.clientY);
+            }, {passive:true});
             window.addEventListener('touchstart', function(e){
-                if(e.touches && e.touches[0]) createRipple(e.touches[0].clientX, e.touches[0].clientY);
+                try{
+                    const t = e.touches && e.touches[0];
+                    if(!t) return;
+                    const el = document.elementFromPoint(t.clientX, t.clientY);
+                    if (el && (el.closest && el.closest('.modal'))) return;
+                    createRipple(t.clientX, t.clientY);
+                }catch(_){ }
             }, {passive:true});
         })();
     </script>
+    @stack('scripts')
 </body>
 </html>

@@ -1,16 +1,26 @@
 version: '3.8'
 services:
   app:
-    image: 'php:8.1-fpm'
+    build: .
+    container_name: laravel_app_app
     volumes:
       - ./:/var/www/html
     working_dir: /var/www/html
     ports:
-      - '8000:8000'
+      - '8001:8000'
+    environment:
+      # Default to SQLite; override to mysql to use the db service
+      DB_CONNECTION: ${DB_CONNECTION:-sqlite}
+      DB_HOST: ${DB_HOST:-db}
+      DB_PORT: ${DB_PORT:-3306}
+      DB_DATABASE: ${DB_DATABASE:-laravel}
+      DB_USERNAME: ${DB_USERNAME:-root}
+      DB_PASSWORD: ${DB_PASSWORD:-secret}
   db:
     image: mysql:8
     environment:
-      MYSQL_DATABASE: laravel
-      MYSQL_ROOT_PASSWORD: secret
+      MYSQL_DATABASE: ${DB_DATABASE:-laravel}
+      MYSQL_ROOT_PASSWORD: ${DB_PASSWORD:-secret}
+    command: --default-authentication-plugin=mysql_native_password
     ports:
       - '3306:3306'

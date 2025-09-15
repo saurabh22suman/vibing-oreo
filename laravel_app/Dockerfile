@@ -10,9 +10,11 @@ RUN apt-get update && apt-get install -y \
     libjpeg-dev \
     libfreetype6-dev \
     libxml2-dev \
+    libsqlite3-dev \
     default-mysql-client \
+    netcat-traditional \
   && docker-php-ext-configure gd --with-jpeg --with-freetype \
-  && docker-php-ext-install pdo pdo_mysql zip gd mbstring xml
+  && docker-php-ext-install pdo pdo_mysql pdo_sqlite zip gd mbstring xml
 
 # composer
 COPY --from=composer:2 /usr/bin/composer /usr/bin/composer

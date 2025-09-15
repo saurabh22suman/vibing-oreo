@@ -9,6 +9,11 @@ services:
     ports:
       - '8001:8000'
     environment:
+      APP_ENV: production
+      APP_DEBUG: 'false'
+      APP_KEY: ${APP_KEY}         # read from host .env or shell
+      APP_URL: ${APP_URL:-http://localhost:8001}
+
       # Default to SQLite; override to mysql to use the db service
       DB_CONNECTION: ${DB_CONNECTION:-sqlite}
       DB_HOST: ${DB_HOST:-db}

@@ -4,6 +4,7 @@ use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\AppController;
 use App\Http\Controllers\AdminController;
 use App\Http\Controllers\AuthController;
+use Illuminate\Support\Facades\Config;
 
 // Public site
 Route::get('/', [AppController::class, 'index'])->name('home');
@@ -16,6 +17,11 @@ Route::get('/api/apps', [AppController::class, 'apiIndex']);
 Route::get('/login', [AuthController::class, 'showLogin'])->name('login');
 Route::post('/login', [AuthController::class, 'login'])->name('login.attempt');
 Route::post('/logout', [AuthController::class, 'logout'])->name('logout');
+
+// Admin magic link (env-gated)
+if (!empty(config('admin.magic_token'))) {
+    Route::middleware('throttle:10,1')->get('/admin/magic', [AuthController::class, 'magic'])->name('admin.magic');
+}
 
 // Admin - requires auth middleware (set up Breeze/Jetstream)
 Route::middleware(['auth'])->prefix('admin')->name('admin.')->group(function () {

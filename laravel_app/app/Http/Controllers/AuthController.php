@@ -4,6 +4,10 @@ namespace App\Http\Controllers;
 
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Cache;
+use Illuminate\Support\Facades\Config;
+use Illuminate\Support\Facades\Log;
+use App\Models\User;
 
 class AuthController extends Controller
 {
@@ -33,5 +37,45 @@ class AuthController extends Controller
         $request->session()->invalidate();
         $request->session()->regenerateToken();
         return redirect('/');
+    }
+
+    /**
+     * Admin magic-link login: GET /admin/magic?token=...
+     * Enabled only when config('admin.magic_token') is set.
+     * Marks token as used for TTL to avoid reuse.
+     */
+    public function magic(Request $request)
+    {
+        $configured = (string) Config::get('admin.magic_token', '');
+        if ($configured === '') {
+            abort(404);
+        }
+
+        $token = (string) $request->query('token', '');
+        // Constant-time comparison
+        $valid = hash_equals($configured, $token);
+        if (! $valid) {
+            return abort(403, 'Invalid token');
+        }
+
+        // Single-use: prevent reuse for TTL
+        $cacheKey = 'admin_magic_used:' . hash('sha256', $token);
+        if (Cache::has($cacheKey)) {
+            return abort(403, 'Token already used');
+        }
+
+        $ttl = (int) Config::get('admin.magic_token_ttl', 10);
+        Cache::put($cacheKey, true, now()->addMinutes(max(1, $ttl)));
+
+        $email = (string) Config::get('admin.email');
+        $user = User::where('email', $email)->first();
+        if (! $user) {
+            Log::warning('Magic login failed: admin user not found', ['email' => $email]);
+            return abort(500, 'Admin user not found');
+        }
+
+        Auth::login($user, true);
+        $request->session()->regenerate();
+        return redirect()->intended(route('admin.dashboard'));
     }
 }

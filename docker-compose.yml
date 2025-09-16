@@ -1,5 +1,0 @@
-version: '3.8'
-
-# This top-level compose has been moved to `laravel_app/docker-compose.local.yml` to keep
-# the Laravel project self-contained. The original content is preserved here as a comment.
-

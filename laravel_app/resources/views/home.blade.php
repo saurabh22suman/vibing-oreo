@@ -3,7 +3,7 @@
 @section('content')
     <div class="mx-auto max-w-7xl px-0 py-12">
         <div class="flex items-center justify-between mb-6">
-            <h2 class="text-2xl font-semibold tracking-tight text-white">Featured Apps</h2>
+            <h2 class="text-2xl font-semibold tracking-tight text-white">Featured Work</h2>
             <div class="flex items-center gap-2"><span class="text-xs text-zinc-500">{{ $apps->count() }} apps</span></div>
         </div>
 

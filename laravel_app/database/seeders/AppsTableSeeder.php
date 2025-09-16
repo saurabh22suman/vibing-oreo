@@ -10,6 +10,11 @@ class AppsTableSeeder extends Seeder
 {
     public function run()
     {
+        if (\Illuminate\Support\Facades\DB::table('apps')->count() > 0) {
+            // Already seeded; skip to preserve existing data
+            echo "AppsTableSeeder: table not empty, skipping\n";
+            return;
+        }
         DB::table('apps')->insert([
             [
                 'title' => 'Weatherly',

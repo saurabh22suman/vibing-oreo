@@ -17,6 +17,28 @@ Notes
 - For production, ensure you set `APP_KEY`, use secure DB credentials, and set `APP_DEBUG=false`.
 - If you want a `dokku`-native Dockerfile (CMD starts server), I can change the Dockerfile to run `php artisan serve` directly.
 
+### Persist data across deploys
+
+When you redeploy, ephemeral containers lose their filesystem. Persist these paths:
+
+- SQLite DB: `/var/www/html/database` (or the exact `DB_DATABASE` path)
+- Uploaded images: `/var/www/html/storage/app/public`
+
+Options:
+
+- Dokploy/Dokku: add persistent storage mounts for those directories in your app settings.
+- Docker Compose: add volumes, e.g.:
+
+	volumes:
+		- dbdata:/var/www/html/database
+		- uploads:/var/www/html/storage/app/public
+
+	volumes:
+		dbdata:
+		uploads:
+
+The entrypoint ensures the SQLite file exists and runs `storage:link` so URLs serve from `public/storage`.
+
 ## Production Notes
 
 - Set `APP_URL` to your `https://` domain and ensure proxies are trusted via `TRUSTED_PROXIES`.

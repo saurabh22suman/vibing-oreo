@@ -40,5 +40,10 @@ echo "Running migrations and seeders"
 php artisan migrate --force || true
 php artisan db:seed --class=DatabaseSeeder --no-interaction || true
 
+# ensure storage symlink
+if [[ ! -e public/storage ]]; then
+  php artisan storage:link || true
+fi
+
 # start the dev server
 php artisan serve --host=0.0.0.0 --port=8000

@@ -5,7 +5,10 @@ services:
     container_name: laravel_app_app
     volumes:
       - ./:/var/www/html
-      - ./.env:/var/www/html/.env 
+      - ./.env:/var/www/html/.env
+      # Persist SQLite database and uploaded images across container restarts/deploys
+      - dbdata:/var/www/html/database
+      - uploads:/var/www/html/storage/app/public
     working_dir: /var/www/html
     ports:
       - '8001:8000'
@@ -22,6 +25,9 @@ services:
       DB_DATABASE: ${DB_DATABASE:-laravel}
       DB_USERNAME: ${DB_USERNAME:-root}
       DB_PASSWORD: ${DB_PASSWORD:-secret}
+volumes:
+  dbdata:
+  uploads:
   db:
     image: mysql:8
     environment:

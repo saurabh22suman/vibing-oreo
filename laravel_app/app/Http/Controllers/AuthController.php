@@ -7,6 +7,7 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Log;
+use Illuminate\Support\Str;
 use App\Models\User;
 
 class AuthController extends Controller
@@ -70,8 +71,13 @@ class AuthController extends Controller
         $email = (string) Config::get('admin.email');
         $user = User::where('email', $email)->first();
         if (! $user) {
-            Log::warning('Magic login failed: admin user not found', ['email' => $email]);
-            return abort(500, 'Admin user not found');
+            // Auto-bootstrap admin if missing
+            $user = User::create([
+                'name' => 'Admin',
+                'email' => $email,
+                'password' => Str::random(40), // hashed by model cast
+            ]);
+            Log::info('Magic login auto-created admin user', ['email' => $email, 'id' => $user->id]);
         }
 
         Auth::login($user, true);
